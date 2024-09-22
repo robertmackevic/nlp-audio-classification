@@ -32,6 +32,11 @@ def load_config(filepath: Path = CONFIG_FILE) -> Namespace:
         return Namespace(**json.load(config))
 
 
+def save_config(config: Namespace, filepath: Path) -> None:
+    with open(filepath, "w") as file:
+        json.dump(vars(config), file, indent=4)
+
+
 def seed_everything(seed: int) -> None:
     random.seed(seed)
     np.random.seed(seed)
