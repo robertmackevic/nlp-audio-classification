@@ -8,6 +8,7 @@ from typing import Optional
 
 import numpy as np
 import torch
+from torch.nn import Module
 
 from src.paths import CONFIG_FILE
 
@@ -27,6 +28,10 @@ def get_available_device() -> torch.device:
     return torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
+def count_parameters(module: Module, trainable: bool = False) -> int:
+    return sum(p.numel() for p in module.parameters() if not trainable or (trainable and p.requires_grad))
+
+
 def load_config(filepath: Path = CONFIG_FILE) -> Namespace:
     with open(filepath, "r") as config:
         return Namespace(**json.load(config))
@@ -35,6 +40,16 @@ def load_config(filepath: Path = CONFIG_FILE) -> Namespace:
 def save_config(config: Namespace, filepath: Path) -> None:
     with open(filepath, "w") as file:
         json.dump(vars(config), file, indent=4)
+
+
+def load_weights(filepath: Path, model: Module) -> Module:
+    checkpoint = torch.load(filepath, map_location=get_available_device())
+    model.load_state_dict(checkpoint)
+    return model
+
+
+def save_weights(filepath: Path, model: Module) -> None:
+    torch.save(model.state_dict(), filepath)
 
 
 def seed_everything(seed: int) -> None:

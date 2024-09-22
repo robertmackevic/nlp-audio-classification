@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader
 from src.data.collate import collate_fn
 from src.data.dataset import AudioClassificationDataset
 from src.trainer import Trainer
-from src.utils import get_logger, load_config, seed_everything
+from src.utils import get_logger, load_config, seed_everything, count_parameters
 
 
 def run() -> None:
@@ -12,8 +12,8 @@ def run() -> None:
     seed_everything(config.seed)
 
     logger.info("Preparing the data...")
-    train_dataset = AudioClassificationDataset(subset="training")
-    val_dataset = AudioClassificationDataset(subset="validation")
+    train_dataset = AudioClassificationDataset(config, subset="training")
+    val_dataset = AudioClassificationDataset(config, subset="validation")
 
     train_dl = DataLoader(
         train_dataset,
@@ -31,6 +31,7 @@ def run() -> None:
     )
 
     trainer = Trainer(config)
+    logger.info(f"Number of trainable parameters: {count_parameters(trainer.model)}")
 
     try:
         logger.info("Starting training...")
