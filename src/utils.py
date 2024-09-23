@@ -43,7 +43,7 @@ def save_config(config: Namespace, filepath: Path) -> None:
 
 
 def load_weights(filepath: Path, model: Module) -> Module:
-    checkpoint = torch.load(filepath, map_location=get_available_device())
+    checkpoint = torch.load(filepath, map_location=get_available_device(), weights_only=True)
     model.load_state_dict(checkpoint)
     return model
 
