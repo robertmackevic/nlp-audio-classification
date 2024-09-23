@@ -2,11 +2,12 @@ from argparse import Namespace
 from os import listdir, makedirs
 from typing import Dict, Optional
 
-from torch import Tensor
+import torch
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard.writer import SummaryWriter
+from tqdm import tqdm
 
 from src.modules.m5 import M5
 from src.paths import RUNS_DIR, CONFIG_FILE
@@ -19,9 +20,9 @@ class AverageMeter:
         self.sum = 0
         self.count = 0
 
-    def update(self, value: float, n: int = 1) -> None:
-        self.sum += value * n
-        self.count += n
+    def update(self, value: float) -> None:
+        self.sum += value
+        self.count += 1
         self.avg = self.sum / self.count
 
 
@@ -30,6 +31,7 @@ class Trainer:
         self.config = config
         self.device = get_available_device()
         self.logger = get_logger(__name__)
+        self.num_classes = len(config.classes)
 
         self.model = M5(config).to(self.device)
         self.optimizer = Adam(self.model.parameters(), lr=self.config.learning_rate)
@@ -74,17 +76,52 @@ class Trainer:
         metrics = {
             "loss": AverageMeter(),
         }
+
+        for batch in tqdm(dataloader):
+            self.optimizer.zero_grad()
+            source = batch[0].to(self.device)
+            target = batch[1].to(self.device)
+            output = self.model(source)
+            loss = self.loss_fn(output, target)
+            loss.backward()
+            self.optimizer.step()
+            metrics["loss"].update(loss.item())
+
         return metrics
 
     def eval(self, dataloader: DataLoader) -> Dict[str, AverageMeter]:
         self.model.eval()
         metrics = {
             "loss": AverageMeter(),
+            "accuracy": AverageMeter(),
+            **{f"accuracy/{class_idx}": AverageMeter() for class_idx in range(self.num_classes)}
         }
-        return metrics
 
-    def _forward(self, batch: Tensor):
-        pass
+        for batch in tqdm(dataloader):
+            source = batch[0].to(self.device)
+            target = batch[1].to(self.device)
+
+            with torch.no_grad():
+                output = self.model(source)
+
+            loss = self.loss_fn(output, target)
+
+            predicted_classes = torch.argmax(output, dim=1)
+            target_classes = torch.argmax(target, dim=1)
+            accuracy = torch.eq(predicted_classes, target_classes).sum().item() / target_classes.size(0)
+
+            metrics["loss"].update(loss.item())
+            metrics["accuracy"].update(accuracy)
+
+            for class_idx in range(self.num_classes):
+                class_mask = torch.eq(target_classes, class_idx)
+                class_samples = class_mask.sum().item()
+
+                if class_samples > 0:
+                    class_accuracy = torch.eq(predicted_classes[class_mask], class_idx).sum().item() / class_samples
+                    metrics[f"accuracy/{class_idx}"].update(class_accuracy)
+
+        return metrics
 
     def log_metrics(
             self,

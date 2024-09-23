@@ -1,7 +1,7 @@
 from argparse import Namespace
 
 from torch import Tensor
-from torch.nn import Module, Sequential, Conv1d, BatchNorm1d, ReLU, MaxPool1d, Linear, AdaptiveAvgPool1d
+from torch.nn import Module, Sequential, Conv1d, BatchNorm1d, ReLU, MaxPool1d, Linear, AdaptiveAvgPool1d, Softmax
 
 
 class M5(Module):
@@ -31,9 +31,10 @@ class M5(Module):
 
         self.avg_pool = AdaptiveAvgPool1d(1)
         self.fc = Linear(512, len(config.classes))
+        self.softmax = Softmax(dim=1)
 
     def forward(self, x: Tensor) -> Tensor:
         x = self.network(x)
         x = self.avg_pool(x).squeeze(-1)
         x = self.fc(x)
-        return x
+        return self.softmax(x)

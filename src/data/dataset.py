@@ -33,7 +33,7 @@ class AudioClassificationDataset(Dataset):
         return len(self.samples)
 
     def label_to_one_hot_tensor(self, label: str) -> Tensor:
-        return one_hot(torch.tensor(self.class_labels.index(label)), num_classes=len(self.class_labels))
+        return one_hot(torch.tensor(self.class_labels.index(label)), num_classes=len(self.class_labels)).float()
 
     def __getitem__(self, index: int) -> Tuple[Tensor, Tensor]:
         sample = self.samples[index]
