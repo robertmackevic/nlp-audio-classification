@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard.writer import SummaryWriter
 from tqdm import tqdm
 
-from src.modules.m5 import M5
+from src.modules.classifier import AudioClassifier
 from src.paths import RUNS_DIR, CONFIG_FILE
 from src.utils import get_available_device, get_logger, save_config, save_weights
 
@@ -33,7 +33,7 @@ class Trainer:
         self.logger = get_logger(__name__)
         self.num_classes = len(config.classes)
 
-        self.model = M5(config).to(self.device)
+        self.model = AudioClassifier(config).to(self.device)
         self.optimizer = Adam(self.model.parameters(), lr=self.config.learning_rate)
         self.loss_fn = CrossEntropyLoss().to(self.device)
 
@@ -129,11 +129,11 @@ class Trainer:
             summary_writer: Optional[SummaryWriter] = None,
             epoch: Optional[int] = None
     ) -> None:
-        message = ""
+        message = "\n"
         for metric, value in metrics.items():
-            message += f"{metric}: {value.avg:.3f} | "
+            message += f"\t{metric}: {value.avg:.3f}\n"
 
             if epoch is not None and summary_writer is not None:
                 summary_writer.add_scalar(tag=metric, scalar_value=value.avg, global_step=epoch)
 
-        self.logger.info(message[:-3])
+        self.logger.info(message)

@@ -17,5 +17,14 @@
         "seven",
         "eight",
         "nine"
-    ]
+    ],
+    "sample_rate": 16000,
+    "mel_spec": {
+        "n_mels": 16,
+        "n_fft": 512,
+        "win_length": 512,
+        "hop_length": 256,
+        "f_min": 0,
+        "f_max": 1000.0
+    }
 }

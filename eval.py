@@ -21,17 +21,18 @@ def run(version: str, weights: str, subset: str) -> None:
     config = load_config(model_dir / CONFIG_FILE.name)
     seed_everything(config.seed)
 
-    logger.info("Preparing the data...")
-    dataloader = get_dataloader(config, subset=subset)
+    for snr_db in [None, 10, -10]:
+        logger.info(f"Preparing the data... (SNR: {snr_db})")
+        dataloader = get_dataloader(config, subset=subset, snr_db=snr_db)
 
-    trainer = Trainer(config)
-    trainer.model = load_weights(filepath=model_dir / weights, model=trainer.model)
-    logger.info(f"Number of model parameters: {count_parameters(trainer.model)}")
+        trainer = Trainer(config)
+        trainer.model = load_weights(filepath=model_dir / weights, model=trainer.model)
+        logger.info(f"Number of model parameters: {count_parameters(trainer.model)}")
 
-    try:
-        trainer.log_metrics(trainer.eval(dataloader))
-    except KeyboardInterrupt:
-        logger.info("Evaluation terminated.")
+        try:
+            trainer.log_metrics(trainer.eval(dataloader))
+        except KeyboardInterrupt:
+            logger.info("Evaluation terminated.")
 
 
 if __name__ == "__main__":
