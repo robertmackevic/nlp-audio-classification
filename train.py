@@ -13,7 +13,7 @@ def run() -> None:
     val_dl = get_dataloader(config, subset="validation")
 
     trainer = Trainer(config)
-    logger.info(f"Number of trainable parameters: {count_parameters(trainer.model)}")
+    logger.info(f"Number of trainable parameters: {count_parameters(trainer.model):,}")
 
     try:
         logger.info("Starting training...")

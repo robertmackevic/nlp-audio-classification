@@ -27,7 +27,7 @@ def run(version: str, weights: str, subset: str) -> None:
 
         trainer = Trainer(config)
         trainer.model = load_weights(filepath=model_dir / weights, model=trainer.model)
-        logger.info(f"Number of model parameters: {count_parameters(trainer.model)}")
+        logger.info(f"Number of model parameters: {count_parameters(trainer.model):,}")
 
         try:
             trainer.log_metrics(trainer.eval(dataloader))

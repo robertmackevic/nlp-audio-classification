@@ -52,8 +52,8 @@ class Trainer:
         best_score_metric = self.config.best_score_metric
 
         for epoch in range(1, self.config.epochs + 1):
-            metrics = self._train_for_epoch(train_dl)
             self.logger.info(f"[Epoch {epoch} / {self.config.epochs}]")
+            metrics = self._train_for_epoch(train_dl)
             self.log_metrics(metrics, summary_writer_train, epoch=epoch)
 
             if epoch % self.config.eval_interval == 0:
