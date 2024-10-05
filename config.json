@@ -1,7 +1,7 @@
 {
     "seed": 42,
     "batch_size": 64,
-    "epochs": 100,
+    "epochs": 50,
     "learning_rate": 1e-4,
     "eval_interval": 1,
     "save_interval": 10,
@@ -19,6 +19,7 @@
         "nine"
     ],
     "sample_rate": 16000,
+    "dropout": 0.1,
     "mel_spec": {
         "n_mels": 64,
         "n_fft": 512,

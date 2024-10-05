@@ -11,6 +11,8 @@ from torch.nn import (
     MaxPool2d,
     Flatten,
     AdaptiveMaxPool2d,
+    Softmax,
+    Dropout
 )
 
 
@@ -34,7 +36,10 @@ class AudioClassifier(Module):
 
             Linear(64 * 16 * 16, 256),
             ReLU(),
+            Dropout(config.dropout),
             Linear(256, len(config.classes)),
+
+            Softmax(dim=1)
         )
 
     def forward(self, x: Tensor) -> Tensor:

@@ -21,7 +21,7 @@ def run(version: str, weights: str, subset: str) -> None:
     config = load_config(model_dir / CONFIG_FILE.name)
     seed_everything(config.seed)
 
-    for snr_db in [None, 10, -10]:
+    for snr_db in [None, 20, 10, 0]:
         logger.info(f"Preparing the data... (SNR: {snr_db})")
         dataloader = get_dataloader(config, subset=subset, snr_db=snr_db)
 
