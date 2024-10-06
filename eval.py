@@ -11,17 +11,20 @@ def parse_args() -> Namespace:
     parser.add_argument("-v", "--version", type=str, required=True, help="v1, v2, v3, etc.")
     parser.add_argument("-w", "--weights", type=str, required=True, help="Name of the .pth file")
     parser.add_argument("-s", "--subset", type=str, required=True, choices=["training", "validation", "testing"])
+    parser.add_argument("--snr", action="store_true", default=False, help="Perform testing with different SNR")
     return parser.parse_args()
 
 
-def run(version: str, weights: str, subset: str) -> None:
+def run(version: str, weights: str, subset: str, snr: bool) -> None:
     logger = get_logger()
     model_dir = RUNS_DIR / version
 
     config = load_config(model_dir / CONFIG_FILE.name)
     seed_everything(config.seed)
 
-    for snr_db in [None, 20, 10, 0]:
+    snr_list = [None, 20, 10, 0] if snr else [None]
+
+    for snr_db in snr_list:
         logger.info(f"Preparing the data... (SNR: {snr_db})")
         dataloader = get_dataloader(config, subset=subset, snr_db=snr_db)
 
